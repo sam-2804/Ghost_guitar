@@ -2,6 +2,19 @@
                                 
                                 
 import cv2
+import mediapipe as mp
+
+model_path = "hand_landmarker.task"
+options = mp.tasks.vision.HandLandmarkerOptions(
+            base_options = mp.tasks.BaseOptions(model_asset_path = model_path),
+            running_mode = mp.tasks.vision.RunningMode.VIDEO,
+            num_hands = 2,
+            min_hand_detection_confidence= 1,
+            min_hand_presence_confidence= 1,
+            min_tracking_confidence= 1 
+            
+)
+landmarker = mp.tasks.vision.HandLandmarker.create_from_options(options)
 
 capture = cv2.VideoCapture(0)
 
