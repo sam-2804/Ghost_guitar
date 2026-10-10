@@ -37,14 +37,23 @@ while capture.isOpened():
    
     timestamp_ms = int(time.time() * 1000)
     result = landmarker.detect_for_video(mp_image, timestamp_ms)    
-   
+    
     if result.hand_landmarks:
         for hand in result.hand_landmarks:
-            for landmark in hand:
+            for landmark in hand:            
                 x = int(landmark.x * flipped_frame.shape[1])
                 y = int(landmark.y * flipped_frame.shape[0])
+                # vizualizing landmarks for testing purspoe,need to remove later to improve performance
                 cv2.circle(flipped_frame, (x, y), 5, (0, 255, 0), -1)    
-                
+    
+    if result.hand_landmarks: 
+        for hand_idx in range(len(result.hand_landmarks)):
+            hand_label = result.handedness[hand_idx][0].category_name
+            
+            #If you are confused why left = right here, frame is flipped before passing into mediapipe 
+            if hand_label == "Left"
+                print("Right hand detected")
+            
     if cv2.waitKey(1) & 0xFF == ord('q'):
         print("Exiting the program")
         break
