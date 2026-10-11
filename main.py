@@ -4,8 +4,12 @@
 import cv2
 import mediapipe as mp
 import time 
+import pygame 
 
+pygame.mixer.init()
+pygame.mixer.set_num_channels(8)
 model_path = "hand_landmarker.task"
+
 options = mp.tasks.vision.HandLandmarkerOptions(
             base_options = mp.tasks.BaseOptions(model_asset_path = model_path),
             running_mode = mp.tasks.vision.RunningMode.VIDEO,
@@ -18,10 +22,14 @@ options = mp.tasks.vision.HandLandmarkerOptions(
 landmarker = mp.tasks.vision.HandLandmarker.create_from_options(options)
 
 capture = cv2.VideoCapture(0)
+capture.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
 down_strum_counter = 1
 up_strum_counter = 1
 previous_y_pos = 0
+last_strum_time = 0
+g_chord_sound = pygame.mixer.Sound("chords/g_chord.wav")
 
 while capture.isOpened():
     
@@ -67,13 +75,17 @@ while capture.isOpened():
                 current_y_pos = y
                 delta_y = current_y_pos - previous_y_pos                
                 
-                if delta_y > 100:
-                    print(f"Down Strum Number {down_strum_counter} Detected")
-                    down_strum_counter += 1
-                
-                if delta_y < -100:
-                    print(f"Up Strum Number {up_strum_counter} Detected")
-                    up_strum_counter += 1
+                if delta_y > 100:                    
+                    if (timestamp_ms-last_strum_time) > 100:
+                        g_chord_sound.play()
+                        print(f"Down Strum Number {down_strum_counter} Detected")
+                        down_strum_counter += 1
+                    
+                if delta_y < -100:                    
+                    if (timestamp_ms-last_strum_time) > 300:
+                        g_chord_sound.play()
+                        print(f"Up Strum Number {up_strum_counter} Detected")
+                        up_strum_counter += 1
                 
                 previous_y_pos = current_y_pos
                 

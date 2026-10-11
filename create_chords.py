@@ -18,3 +18,5 @@ final_audio = mixed_chord * fade
 audio_data = np.int16(final_audio * 32767)
 wavfile.write("chords\g_chord.wav", sample_rate, audio_data)
 print("Cached g_chord.wav successfully!")
+
+#TODO : Wrap this code into a function that accepts 3 frequencies of the any to generate a chord
