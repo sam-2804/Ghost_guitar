@@ -19,8 +19,10 @@ landmarker = mp.tasks.vision.HandLandmarker.create_from_options(options)
 
 capture = cv2.VideoCapture(0)
 
-i = 1
+down_strum_counter = 1
+up_strum_counter = 1
 previous_y_pos = 0
+
 while capture.isOpened():
     
     ret,frame = capture.read()
@@ -57,19 +59,22 @@ while capture.isOpened():
             #If you are confused why left = right here, frame is flipped before passing into mediapipe 
             if hand_label == "Left":
 
-                #anchor point is 0, since its where pick is usually held
+                #anchor point is 8, since its where pick is usually held
                 anchor_point = result.hand_landmarks[hand_idx][8]
                 x = int(anchor_point.x * flipped_frame.shape[1])
                 y = int(anchor_point.y * flipped_frame.shape[0])
                 
                 current_y_pos = y
-                delta_y = current_y_pos - previous_y_pos
-                print("Y difference : ",delta_y)                
+                delta_y = current_y_pos - previous_y_pos                
                 
-                if delta_y > 100 and current_y_pos > previous_y_pos:
-                    print(f"Down Strum Number {i} Detected")
-                    i += 1
-
+                if delta_y > 100:
+                    print(f"Down Strum Number {down_strum_counter} Detected")
+                    down_strum_counter += 1
+                
+                if delta_y < -100:
+                    print(f"Up Strum Number {up_strum_counter} Detected")
+                    up_strum_counter += 1
+                
                 previous_y_pos = current_y_pos
                 
     if cv2.waitKey(1) & 0xFF == ord('q'):
