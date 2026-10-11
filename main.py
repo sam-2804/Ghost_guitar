@@ -10,15 +10,17 @@ options = mp.tasks.vision.HandLandmarkerOptions(
             base_options = mp.tasks.BaseOptions(model_asset_path = model_path),
             running_mode = mp.tasks.vision.RunningMode.VIDEO,
             num_hands = 2,
-            min_hand_detection_confidence= 0.7,
-            min_hand_presence_confidence= 0.7,
-            min_tracking_confidence= 0.7
+            min_hand_detection_confidence= 0.4,
+            min_hand_presence_confidence= 0.4,
+            min_tracking_confidence= 0.4
             
 )
 landmarker = mp.tasks.vision.HandLandmarker.create_from_options(options)
 
 capture = cv2.VideoCapture(0)
 
+i = 1
+previous_y_pos = 0
 while capture.isOpened():
     
     ret,frame = capture.read()
@@ -38,6 +40,7 @@ while capture.isOpened():
     timestamp_ms = int(time.time() * 1000)
     result = landmarker.detect_for_video(mp_image, timestamp_ms)    
     
+    
     if result.hand_landmarks:
         for hand in result.hand_landmarks:
             for landmark in hand:            
@@ -46,21 +49,29 @@ while capture.isOpened():
                 # visualizing landmarks for testing purpose,need to remove later to improve performance
                 cv2.circle(flipped_frame, (x, y), 5, (0, 255, 0), -1)    
     
+    
     if result.hand_landmarks: 
         for hand_idx in range(len(result.hand_landmarks)):
             hand_label = result.handedness[hand_idx][0].category_name
             
             #If you are confused why left = right here, frame is flipped before passing into mediapipe 
             if hand_label == "Left":
-                print("Right hand detected")
-                index_fnger_tip = result.hand_landmarks[hand_idx][8]
-                x = int(index_fnger_tip.x * flipped_frame.shape[1])
-                y = int(index_fnger_tip.y * flipped_frame.shape[0])
+
+                #anchor point is 0, since its where pick is usually held
+                anchor_point = result.hand_landmarks[hand_idx][8]
+                x = int(anchor_point.x * flipped_frame.shape[1])
+                y = int(anchor_point.y * flipped_frame.shape[0])
                 
-                #Temporary condition for strumming
-                if y < 180:
-                    print("Strum")
-                    
+                current_y_pos = y
+                delta_y = current_y_pos - previous_y_pos
+                print("Y difference : ",delta_y)                
+                
+                if delta_y > 100 and current_y_pos > previous_y_pos:
+                    print(f"Down Strum Number {i} Detected")
+                    i += 1
+
+                previous_y_pos = current_y_pos
+                
     if cv2.waitKey(1) & 0xFF == ord('q'):
         print("Exiting the program")
         break
