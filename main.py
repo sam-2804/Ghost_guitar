@@ -76,7 +76,7 @@ while capture.isOpened():
                 delta_y = current_y_pos - previous_y_pos                
                 
                 if delta_y > 100:                    
-                    if (timestamp_ms-last_strum_time) > 100:
+                    if (timestamp_ms-last_strum_time) > 300:
                         g_chord_sound.play()
                         print(f"Down Strum Number {down_strum_counter} Detected")
                         down_strum_counter += 1
