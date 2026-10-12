@@ -29,7 +29,9 @@ down_strum_counter = 1
 up_strum_counter = 1
 previous_y_pos = 0
 last_strum_time = 0
-
+finger_tips = [8,12,16,20]
+finger_pips = [6,10,14,18]
+                
 g_chord_sound = pygame.mixer.Sound("chords/cleanchord-G.wav")
 c_chord_sound = pygame.mixer.Sound("chords/cleanchord-C.wav")
 d_chord_sound = pygame.mixer.Sound("chords/cleanchord-D.wav")
@@ -55,14 +57,15 @@ while capture.isOpened():
     result = landmarker.detect_for_video(mp_image, timestamp_ms)    
     
     
-    if result.hand_landmarks:
-        for hand in result.hand_landmarks:
-            for landmark in hand:            
-                x = int(landmark.x * flipped_frame.shape[1])
-                y = int(landmark.y * flipped_frame.shape[0])
-                # visualizing landmarks for testing purpose,need to remove later to improve performance
-                cv2.circle(flipped_frame, (x, y), 5, (0, 255, 0), -1)    
-                
+    #if result.hand_landmarks:
+    #    for hand in result.hand_landmarks:
+    #        for landmark in hand:            
+    #            x = int(landmark.x * flipped_frame.shape[1])
+    #            y = int(landmark.y * flipped_frame.shape[0])
+    #            # visualizing landmarks for testing purpose,need to remove later to improve performance
+    #            cv2.circle(flipped_frame, (x, y), 5, (0, 255, 0), -1)    
+    # NOTE : Only uncomment this if you are unsure if the model's tracking capabilities
+    
     if result.hand_landmarks: 
         for hand_idx in range(len(result.hand_landmarks)):
             hand_label = result.handedness[hand_idx][0].category_name
@@ -74,6 +77,7 @@ while capture.isOpened():
                 anchor_point = result.hand_landmarks[hand_idx][8]
                 x = int(anchor_point.x * flipped_frame.shape[1])
                 y = int(anchor_point.y * flipped_frame.shape[0])
+                cv2.circle(flipped_frame,(x,y), 5, (0, 255, 0 ), -1)
                 
                 current_y_pos = y
                 delta_y = current_y_pos - previous_y_pos                
@@ -97,16 +101,21 @@ while capture.isOpened():
             if hand_label == "Right":
                 
                 fingers = []
-                
-                finger_tips = [8,12,16,20]
-                finger_pips = [6,10,14,18]
-                
                 for tip,pip in zip(finger_tips, finger_pips):
                     if result.hand_landmarks[hand_idx][tip].y < result.hand_landmarks[hand_idx][pip].y:
                         fingers.append(1)
                     else:
                         fingers.append(0)
-
+                    
+                
+                    tip_x = int(result.hand_landmarks[hand_idx][tip].x * flipped_frame.shape[1])
+                    tip_y = int(result.hand_landmarks[hand_idx][tip].y * flipped_frame.shape[0])
+                    cv2.circle(flipped_frame,(tip_x,tip_y), 5, (0, 255, 0 ), -1)
+                
+                    pip_x = int(result.hand_landmarks[hand_idx][pip].x * flipped_frame.shape[1])
+                    pip_y = int(result.hand_landmarks[hand_idx][pip].y * flipped_frame.shape[0])
+                    cv2.circle(flipped_frame,(pip_x,pip_y), 5, (0, 255, 0 ), -1)
+                    
                 if fingers == [1,0,0,0]:
                     print("G chord dectected")
                     active_chord = g_chord_sound
