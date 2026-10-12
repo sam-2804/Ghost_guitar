@@ -61,8 +61,7 @@ while capture.isOpened():
                 y = int(landmark.y * flipped_frame.shape[0])
                 # visualizing landmarks for testing purpose,need to remove later to improve performance
                 cv2.circle(flipped_frame, (x, y), 5, (0, 255, 0), -1)    
-    
-    
+                
     if result.hand_landmarks: 
         for hand_idx in range(len(result.hand_landmarks)):
             hand_label = result.handedness[hand_idx][0].category_name
@@ -91,7 +90,27 @@ while capture.isOpened():
                         up_strum_counter += 1
                 
                 previous_y_pos = current_y_pos
+            
+            if hand_label == "Right":
                 
+                fingers = []
+                
+                finger_tips = [8,12,16,20]
+                finger_pips = [6,10,14,18]
+                
+                for tip,pip in zip(finger_tips, finger_pips):
+                    if result.hand_landmarks[hand_idx][tip].y < result.hand_landmarks[hand_idx][pip].y:
+                        fingers.append(1)
+                    else:
+                        fingers.append(0)
+
+                if fingers == [1,0,0,0]:
+                    print("G chord dectected")
+                if fingers == [0,1,1,1]:
+                    print("C chord dectected")
+                if fingers == [1,1,1,1]:
+                    print("D chord dectected")
+                    
     if cv2.waitKey(1) & 0xFF == ord('q'):
         print("Exiting the program")
         break
