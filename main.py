@@ -33,6 +33,7 @@ last_strum_time = 0
 g_chord_sound = pygame.mixer.Sound("chords/cleanchord-G.wav")
 c_chord_sound = pygame.mixer.Sound("chords/cleanchord-C.wav")
 d_chord_sound = pygame.mixer.Sound("chords/cleanchord-D.wav")
+active_chord = g_chord_sound
 
 while capture.isOpened():
     
@@ -79,13 +80,13 @@ while capture.isOpened():
                 
                 if delta_y > 100:                    
                     if (timestamp_ms-last_strum_time) > 300:
-                        g_chord_sound.play()
+                        active_chord.play()
                         print(f"Down Strum Number {down_strum_counter} Detected")
                         down_strum_counter += 1
                     
                 if delta_y < -100:                    
                     if (timestamp_ms-last_strum_time) > 300:
-                        g_chord_sound.play()
+                        active_chord.play()
                         print(f"Up Strum Number {up_strum_counter} Detected")
                         up_strum_counter += 1
                 
@@ -106,10 +107,15 @@ while capture.isOpened():
 
                 if fingers == [1,0,0,0]:
                     print("G chord dectected")
+                    active_chord = g_chord_sound
+                    
                 if fingers == [0,1,1,1]:
+                    active_chord = c_chord_sound
                     print("C chord dectected")
+                    
                 if fingers == [1,1,1,1]:
                     print("D chord dectected")
+                    active_chord = d_chord_sound
                     
     if cv2.waitKey(1) & 0xFF == ord('q'):
         print("Exiting the program")
