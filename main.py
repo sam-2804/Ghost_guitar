@@ -29,7 +29,10 @@ down_strum_counter = 1
 up_strum_counter = 1
 previous_y_pos = 0
 last_strum_time = 0
-g_chord_sound = pygame.mixer.Sound("chords/g_chord.wav")
+
+g_chord_sound = pygame.mixer.Sound("chords/cleanchord-G.wav")
+c_chord_sound = pygame.mixer.Sound("chords/cleanchord-C.wav")
+d_chord_sound = pygame.mixer.Sound("chords/cleanchord-D.wav")
 
 while capture.isOpened():
     
