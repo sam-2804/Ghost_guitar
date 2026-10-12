@@ -80,12 +80,14 @@ while capture.isOpened():
                 
                 if delta_y > 100:                    
                     if (timestamp_ms-last_strum_time) > 300:
+                        pygame.mixer.fadeout(100) # Replacement for clearing any previous sound, since using pygame can cause "pop" sounds
                         active_chord.play()
                         print(f"Down Strum Number {down_strum_counter} Detected")
                         down_strum_counter += 1
                     
                 if delta_y < -100:                    
                     if (timestamp_ms-last_strum_time) > 300:
+                        pygame.mixer.fadeout(100)
                         active_chord.play()
                         print(f"Up Strum Number {up_strum_counter} Detected")
                         up_strum_counter += 1
