@@ -11,12 +11,16 @@ b_wave = np.sin(246.94 * 2 * np.pi * time_arr)
 d_wave = np.sin(293.66 * 2 * np.pi * time_arr)
 
 mixed_chord = (g_wave + b_wave + d_wave) / 3
+
 fade = np.linspace(1, 0, len(time_arr))
-final_audio = mixed_chord * fade
+final_audio = mixed_chord * fade    # To mimic the fade out of chord like in real life
+fade_in = np.linspace(0, 1, 1000)   # prevents the chord from creating a pop sound due to huge jump in volume, i.e 0.0-0.8
 
+final_audio[:1000] = final_audio[:1000] * fade_in
+safe_audio = np.clip(final_audio, -1.0, 1.0)    # Prevent excessive sound da
+audio_data = (safe_audio * 32767).astype(np.int16)  # conversion required by scipy to make a standard .wav file
 
-audio_data = np.int16(final_audio * 32767)
-wavfile.write("chords\g_chord.wav", sample_rate, audio_data)
-print("Cached g_chord.wav successfully!")
+wavfile.write("chords/g_chord.wav", sample_rate, audio_data)
+print("Cached safe g_chord.wav successfully!")
 
-#TODO : Wrap this code into a function that accepts 3 frequencies of the any to generate a chord
+#TODO : Wrap this code into a function that accepts any 3 frequencies to generate a chord
