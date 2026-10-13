@@ -1,26 +1,56 @@
-import numpy as np
-from scipy.io import wavfile
+import mido
+import subprocess
+import os
 
-#To control the sustain of the chord
-duration = 1.5
-sample_rate = 44100
-time_arr = np.linspace(0, duration, int(sample_rate * duration), False)
+soundfont = "FluidR3_GM.sf2"
+output_dir = "chords"
+os.makedirs(output_dir, exist_ok=True)
 
-g_wave = np.sin(196.00 * 2 * np.pi * time_arr)
-b_wave = np.sin(246.94 * 2 * np.pi * time_arr)
-d_wave = np.sin(293.66 * 2 * np.pi * time_arr)
+def generate_strum_wav(chord_name, midi_notes, strum_direction, delay_ms=15):
+    
+    midi_filename = f"{chord_name}_{strum_direction}.mid"
+    wav_filename = os.path.join(output_dir, f"{chord_name}_{strum_direction}.wav")
+    
+    # MIDI file and track inialization
+    mid = mido.MidiFile()
+    track = mido.MidiTrack()
+    mid.tracks.append(track)
+    track.append(mido.Message('program_change', program=25, time=0))
+    
+    ticks_per_ms = 1  
+    delay_ticks = int(delay_ms * ticks_per_ms)
+    
+    track.append(mido.Message('note_on', note=midi_notes[0], velocity=100, time=0))
+    for note in midi_notes[1:]:
+        track.append(mido.Message('note_on', note=note, velocity=100, time=delay_ticks))
+        
+    track.append(mido.Message('note_off', note=midi_notes[0], velocity=0, time=1500))
+    for note in midi_notes[1:]:
+        track.append(mido.Message('note_off', note=note, velocity=0, time=0))
+        
+    mid.save(midi_filename)
+    
+    print(f"Rendering {wav_filename}...")
+    result = subprocess.run([
+        "fluidsynth", 
+        "-F", wav_filename,  # Fast-rendering to file
+        "-ni",               # No MIDI input (offline mode)
+        soundfont, 
+        midi_filename
+    ], capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW) 
+    
+    os.remove(midi_filename)
+    print(f"Successfully generated: {wav_filename}")
 
-mixed_chord = (g_wave + b_wave + d_wave) / 3
 
-fade = np.linspace(1, 0, len(time_arr))
-final_audio = mixed_chord * fade    # To mimic the fade out of chord like in real life
-fade_in = np.linspace(0, 1, 1000)   # prevents the chord from creating a pop sound due to huge jump in volume, i.e 0.0-0.8
+chords = {
+    "G_chord": [43, 47, 50, 55, 59, 67],
+    "C_chord": [48, 52, 55, 60, 64],      # Standard 5-string open C
+    "D_chord": [50, 57, 62, 66]           # Standard 4-string open D
+}
 
-final_audio[:1000] = final_audio[:1000] * fade_in
-safe_audio = np.clip(final_audio, -1.0, 1.0)    # Prevent excessive sound da
-audio_data = (safe_audio * 32767).astype(np.int16)  # conversion required by scipy to make a standard .wav file
+for name, notes in chords.items():
+    generate_strum_wav(name, notes, "down", delay_ms=50)
+    generate_strum_wav(name, notes[::-1], "up", delay_ms=50)
 
-wavfile.write("chords/g_chord.wav", sample_rate, audio_data)
-print("Cached safe g_chord.wav successfully!")
-
-#TODO : Wrap this code into a function that accepts any 3 frequencies to generate a chord
+print("\nAll chords cached!")
