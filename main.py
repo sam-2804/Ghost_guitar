@@ -32,9 +32,9 @@ last_strum_time = 0
 finger_tips = [8,12,16,20]
 finger_pips = [6,10,14,18]
                 
-g_chord_sound = pygame.mixer.Sound("chords/cleanchord-G.wav")
-c_chord_sound = pygame.mixer.Sound("chords/cleanchord-C.wav")
-d_chord_sound = pygame.mixer.Sound("chords/cleanchord-D.wav")
+g_chord_sound = [pygame.mixer.Sound("chords/G_chord_down.wav"), pygame.mixer.Sound("chords/G_chord_up.wav")]
+c_chord_sound = [pygame.mixer.Sound("chords/C_chord_down.wav"), pygame.mixer.Sound("chords/C_chord_up.wav")]
+d_chord_sound = [pygame.mixer.Sound("chords/D_chord_down.wav"), pygame.mixer.Sound("chords/D_chord_up.wav")]
 active_chord = g_chord_sound
 
 while capture.isOpened():
@@ -85,18 +85,18 @@ while capture.isOpened():
                 if delta_y > 100:                    
                     if (timestamp_ms-last_strum_time) > 300:
                         pygame.mixer.fadeout(100) # Replacement for clearing any previous sound, since using pygame can cause "pop" sounds
-                        active_chord.play()
+                        active_chord[0].play()
                         last_strum_time = timestamp_ms
                         print(f"Down Strum Number {down_strum_counter} Detected")
-                        down_strum_counter += 1 #debug statement, remove if performance is needed
+                        down_strum_counter += 1 # debug statement, remove if performance is needed
                     
                 if delta_y < -100:                    
                     if (timestamp_ms-last_strum_time) > 300:
                         pygame.mixer.fadeout(100)
-                        active_chord.play()
+                        active_chord[1].play()
                         last_strum_time = timestamp_ms
                         print(f"Up Strum Number {up_strum_counter} Detected")
-                        up_strum_counter += 1 #debug statement, remove if performance is needed
+                        up_strum_counter += 1 # debug statement, remove if performance is needed
                 
                 previous_y_pos = current_y_pos
             
