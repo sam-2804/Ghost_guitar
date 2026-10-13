@@ -17,7 +17,7 @@ options = mp.tasks.vision.HandLandmarkerOptions(
             min_hand_detection_confidence= 0.4,
             min_hand_presence_confidence= 0.4,
             min_tracking_confidence= 0.4
-            
+            # lower these values if performance is needed, Might lower accuracy
 )
 landmarker = mp.tasks.vision.HandLandmarker.create_from_options(options)
 
@@ -64,7 +64,7 @@ while capture.isOpened():
     #            y = int(landmark.y * flipped_frame.shape[0])
     #            # visualizing landmarks for testing purpose,need to remove later to improve performance
     #            cv2.circle(flipped_frame, (x, y), 5, (0, 255, 0), -1)    
-    # NOTE : Only uncomment this if you are unsure if the model's tracking capabilities
+    # NOTE : Only uncomment this if you are unsure of the model's tracking capabilities
     
     if result.hand_landmarks: 
         for hand_idx in range(len(result.hand_landmarks)):
@@ -86,15 +86,17 @@ while capture.isOpened():
                     if (timestamp_ms-last_strum_time) > 300:
                         pygame.mixer.fadeout(100) # Replacement for clearing any previous sound, since using pygame can cause "pop" sounds
                         active_chord.play()
+                        last_strum_time = timestamp_ms
                         print(f"Down Strum Number {down_strum_counter} Detected")
-                        down_strum_counter += 1
+                        down_strum_counter += 1 #debug statement, remove if performance is needed
                     
                 if delta_y < -100:                    
                     if (timestamp_ms-last_strum_time) > 300:
                         pygame.mixer.fadeout(100)
                         active_chord.play()
+                        last_strum_time = timestamp_ms
                         print(f"Up Strum Number {up_strum_counter} Detected")
-                        up_strum_counter += 1
+                        up_strum_counter += 1 #debug statement, remove if performance is needed
                 
                 previous_y_pos = current_y_pos
             
@@ -120,11 +122,11 @@ while capture.isOpened():
                     print("G chord dectected")
                     active_chord = g_chord_sound
                     
-                if fingers == [0,1,1,1]:
+                elif fingers == [0,1,1,1]:
                     active_chord = c_chord_sound
                     print("C chord dectected")
                     
-                if fingers == [1,1,1,1]:
+                elif fingers == [1,1,1,1]:
                     print("D chord dectected")
                     active_chord = d_chord_sound
                     
@@ -135,4 +137,4 @@ while capture.isOpened():
     cv2.imshow("Virtual Guitar Feed",flipped_frame)
     
 capture.release()
-cv2.destroyAllWindows
+cv2.destroyAllWindows()
