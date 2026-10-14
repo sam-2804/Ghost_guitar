@@ -35,6 +35,8 @@ def generate_strum_wav(chord_name, midi_notes, strum_direction, delay_ms=15):
         "fluidsynth", 
         "-F", wav_filename,  # Fast-rendering to file
         "-ni",               # No MIDI input (offline mode)
+        "-R", "0",           # Disable Reverb tail
+        "-C", "0"            # Disable Chorus tail
         soundfont, 
         midi_filename
     ], capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW) 
