@@ -31,10 +31,13 @@ previous_y_pos = 0
 last_strum_time = 0
 finger_tips = [8,12,16,20]
 finger_pips = [6,10,14,18]
+cooldown_ms = 150       
+velocity_slow = 80      
+velocity_fast = 220     
                 
-g_chord_sound = [pygame.mixer.Sound("chords/G_chord_down.wav"), pygame.mixer.Sound("chords/G_chord_up.wav")]
-c_chord_sound = [pygame.mixer.Sound("chords/C_chord_down.wav"), pygame.mixer.Sound("chords/C_chord_up.wav")]
-d_chord_sound = [pygame.mixer.Sound("chords/D_chord_down.wav"), pygame.mixer.Sound("chords/D_chord_up.wav")]
+g_chord_sound = [pygame.mixer.Sound("chords/G_chord_down.wav"), pygame.mixer.Sound("chords/G_chord_up.wav"),pygame.mixer.Sound("chords/G_chord_fast_down.wav"),pygame.mixer.Sound("chords/G_chord_fast_up.wav")]
+c_chord_sound = [pygame.mixer.Sound("chords/C_chord_down.wav"), pygame.mixer.Sound("chords/C_chord_up.wav"),pygame.mixer.Sound("chords/C_chord_fast_down.wav"),pygame.mixer.Sound("chords/C_chord_fast_up.wav")]
+d_chord_sound = [pygame.mixer.Sound("chords/D_chord_down.wav"), pygame.mixer.Sound("chords/D_chord_up.wav"),pygame.mixer.Sound("chords/D_chord_fast_down.wav"),pygame.mixer.Sound("chords/D_chord_fast_up.wav")]
 active_chord = g_chord_sound
 
 while capture.isOpened():
@@ -61,11 +64,12 @@ while capture.isOpened():
     #    for hand in result.hand_landmarks:
     #        for landmark in hand:            
     #            x = int(landmark.x * flipped_frame.shape[1])
-    #            y = int(landmark.y * flipped_frame.shape[0])
-    #            # visualizing landmarks for testing purpose,need to remove later to improve performance
+    #            y = int(landmark.y * flipped_frame.shape[0]) #visualizing landmarks for testing purpose,need to remove later to improve performance
     #            cv2.circle(flipped_frame, (x, y), 5, (0, 255, 0), -1)    
-    # NOTE : Only uncomment this if you are unsure of the model's tracking capabilities
-    
+    #NOTE : Only uncomment this if you are unsure of the model's tracking capabilities
+        
+
+
     if result.hand_landmarks: 
         for hand_idx in range(len(result.hand_landmarks)):
             hand_label = result.handedness[hand_idx][0].category_name
@@ -82,22 +86,35 @@ while capture.isOpened():
                 current_y_pos = y
                 delta_y = current_y_pos - previous_y_pos                
                 
-                if delta_y > 100:                    
-                    if (timestamp_ms-last_strum_time) > 300:
-                        pygame.mixer.fadeout(100) # Replacement for clearing any previous sound, since using pygame can cause "pop" sounds
-                        active_chord[0].play()
-                        last_strum_time = timestamp_ms
-                        print(f"Down Strum Number {down_strum_counter} Detected")
-                        down_strum_counter += 1 # debug statement, remove if performance is needed
+                time_since_last_strum = timestamp_ms - last_strum_time
+
+                if time_since_last_strum > cooldown_ms:
                     
-                if delta_y < -100:                    
-                    if (timestamp_ms-last_strum_time) > 300:
-                        pygame.mixer.fadeout(100)
-                        active_chord[1].play()
+                    if delta_y > velocity_slow:        
+                        
+                        if delta_y >= velocity_fast:    
+                            pygame.mixer.stop() 
+                            active_chord[2].play() 
+                            print("Fast Down Strum Detected ")
+                        
+                        else:
+                            pygame.mixer.fadeout(50)
+                            active_chord[0].play() 
+                            print("Normal Down Strum")
                         last_strum_time = timestamp_ms
-                        print(f"Up Strum Number {up_strum_counter} Detected")
-                        up_strum_counter += 1 # debug statement, remove if performance is needed
-                
+
+                    elif delta_y < -velocity_slow:
+                    
+                        if delta_y <= -velocity_fast:
+                            pygame.mixer.stop()
+                            active_chord[3].play() 
+                            print("fast Up Strum Detected ")
+                        else:
+                            pygame.mixer.fadeout(50)
+                            active_chord[1].play() 
+                            print("Normal Up Strum ")
+                        
+                        last_strum_time = timestamp_ms
                 previous_y_pos = current_y_pos
             
             if hand_label == "Right":
@@ -110,13 +127,13 @@ while capture.isOpened():
                         fingers.append(0)
                     
                 
-                    tip_x = int(result.hand_landmarks[hand_idx][tip].x * flipped_frame.shape[1])
-                    tip_y = int(result.hand_landmarks[hand_idx][tip].y * flipped_frame.shape[0])
-                    cv2.circle(flipped_frame,(tip_x,tip_y), 5, (0, 255, 0 ), -1)
+                    #tip_x = int(result.hand_landmarks[hand_idx][tip].x * flipped_frame.shape[1])
+                    #tip_y = int(result.hand_landmarks[hand_idx][tip].y * flipped_frame.shape[0])
+                    #cv2.circle(flipped_frame,(tip_x,tip_y), 5, (0, 255, 0 ), -1)
                 
-                    pip_x = int(result.hand_landmarks[hand_idx][pip].x * flipped_frame.shape[1])
-                    pip_y = int(result.hand_landmarks[hand_idx][pip].y * flipped_frame.shape[0])
-                    cv2.circle(flipped_frame,(pip_x,pip_y), 5, (0, 255, 0 ), -1)
+                    #pip_x = int(result.hand_landmarks[hand_idx][pip].x * flipped_frame.shape[1])
+                    #pip_y = int(result.hand_landmarks[hand_idx][pip].y * flipped_frame.shape[0])
+                    #cv2.circle(flipped_frame,(pip_x,pip_y), 5, (0, 255, 0 ), -1)
                     
                 if fingers == [1,0,0,0]:
                     print("G chord dectected")

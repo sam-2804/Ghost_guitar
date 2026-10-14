@@ -44,13 +44,13 @@ def generate_strum_wav(chord_name, midi_notes, strum_direction, delay_ms=15):
 
 
 chords = {
-    "G_chord": [43, 47, 50, 55, 59, 67],
-    "C_chord": [48, 52, 55, 60, 64],      # Standard 5-string open C
-    "D_chord": [50, 57, 62, 66]           # Standard 4-string open D
+    "G_chord_fast": [43, 47, 50, 55, 59, 67],
+    "C_chord_fast": [48, 52, 55, 60, 64],      # Standard 5-string open C
+    "D_chord_fast": [50, 57, 62, 66]           # Standard 4-string open D
 }
 
 for name, notes in chords.items():
-    generate_strum_wav(name, notes, "down", delay_ms=50)
-    generate_strum_wav(name, notes[::-1], "up", delay_ms=50)
+    generate_strum_wav(name, notes, "down", delay_ms=10)
+    generate_strum_wav(name, notes[::-1], "up", delay_ms=10)
 
 print("\nAll chords cached!")
