@@ -33,11 +33,12 @@ finger_tips = [8,12,16,20]
 finger_pips = [6,10,14,18]
 cooldown_ms = 150       
 velocity_slow = 80      
-velocity_fast = 220     
+velocity_fast = 480     
                 
 g_chord_sound = [pygame.mixer.Sound("chords/G_chord_down.wav"), pygame.mixer.Sound("chords/G_chord_up.wav"),pygame.mixer.Sound("chords/G_chord_fast_down.wav"),pygame.mixer.Sound("chords/G_chord_fast_up.wav")]
 c_chord_sound = [pygame.mixer.Sound("chords/C_chord_down.wav"), pygame.mixer.Sound("chords/C_chord_up.wav"),pygame.mixer.Sound("chords/C_chord_fast_down.wav"),pygame.mixer.Sound("chords/C_chord_fast_up.wav")]
 d_chord_sound = [pygame.mixer.Sound("chords/D_chord_down.wav"), pygame.mixer.Sound("chords/D_chord_up.wav"),pygame.mixer.Sound("chords/D_chord_fast_down.wav"),pygame.mixer.Sound("chords/D_chord_fast_up.wav")]
+Em_chord_sound = [pygame.mixer.Sound("chords/Em_chord_down.wav"), pygame.mixer.Sound("chords/Em_chord_up.wav"),pygame.mixer.Sound("chords/Em_chord_fast_down.wav"),pygame.mixer.Sound("chords/Em_chord_fast_up.wav")]
 active_chord = g_chord_sound
 
 while capture.isOpened():
@@ -138,6 +139,10 @@ while capture.isOpened():
                 if fingers == [1,0,0,0]:
                     print("G chord dectected")
                     active_chord = g_chord_sound
+    
+                elif fingers == [1, 1, 0, 0]:
+                    active_chord = Em_chord_sound
+                    print("Em chord detected")
                     
                 elif fingers == [0,1,1,1]:
                     active_chord = c_chord_sound
@@ -146,7 +151,8 @@ while capture.isOpened():
                 elif fingers == [1,1,1,1]:
                     print("D chord dectected")
                     active_chord = d_chord_sound
-                    
+                
+        
     if cv2.waitKey(1) & 0xFF == ord('q'):
         print("Exiting the program")
         break

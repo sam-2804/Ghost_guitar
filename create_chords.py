@@ -15,7 +15,7 @@ def generate_strum_wav(chord_name, midi_notes, strum_direction, delay_ms=15, sus
     mid = mido.MidiFile()
     track = mido.MidiTrack()
     mid.tracks.append(track)
-    track.append(mido.Message('program_change', program=25, time=0))
+    track.append(mido.Message('program_change', program=26, time=0))
     
     
     delay_ticks = int(delay_ms * 1) 
@@ -37,7 +37,7 @@ def generate_strum_wav(chord_name, midi_notes, strum_direction, delay_ms=15, sus
         "-F", wav_filename,  # Fast-rendering to file
         "-ni",               # No MIDI input (offline mode)
         "-R", "0",           # Disable Reverb tail
-        "-C", "0"            # Disable Chorus tail
+        "-C", "0",            # Disable Chorus tail
         soundfont, 
         midi_filename
     ], capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW) 
@@ -47,16 +47,18 @@ def generate_strum_wav(chord_name, midi_notes, strum_direction, delay_ms=15, sus
 
 
 chords = {
-    "G_chord_fast": [43, 47, 50, 55, 59, 67],
-    "C_chord_fast": [48, 52, 55, 60, 64],      # Standard 5-string open C
-    "D_chord_fast": [50, 57, 62, 66]           # Standard 4-string open D
+    "G_chord": [43, 47, 50, 55, 59, 67],
+    "C_chord": [48, 52, 55, 60, 64],      # Standard 5-string open C
+    "D_chord": [50, 57, 62, 66],      # Standard 4-string open D
+    "Em_chord": [40, 47, 52, 55, 59, 64]
 }
 
-fast_name = f"{name}_fast"
+
 
 for name, notes in chords.items():
-    generate_strum_wav(name, notes, "down", delay_ms=10)
-    generate_strum_wav(name, notes[::-1], "up", delay_ms=10)
-    generate_strum_wav(fast_name, notes, "down", delay_ms=10, sustain_ms=50)
-    generate_strum_wav(fast_name, notes[::-1], "up", delay_ms=10, sustain_ms=50)
+    fast_name = f"{name}_fast"
+    generate_strum_wav(name, notes, "down", delay_ms=10, sustain_ms = 2500)
+    generate_strum_wav(name, notes[::-1], "up", delay_ms=10, sustain_ms = 2500)
+    generate_strum_wav(fast_name, notes, "down", delay_ms=10, sustain_ms= 100)
+    generate_strum_wav(fast_name, notes[::-1], "up", delay_ms=10, sustain_ms= 100)
 print("\nAll chords cached!")
